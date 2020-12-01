@@ -3,7 +3,9 @@ package jp.techacademy.moe.hatori.qa_app_kotlin
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.View
+import androidx.core.view.isVisible
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import kotlinx.android.synthetic.main.activity_question_detail.*
@@ -16,7 +18,9 @@ class QuestionDetailActivity : AppCompatActivity() {
     private lateinit var mAnswerRef: DatabaseReference
 
 
+    //回答が更新されたらリストを更新する
     private val mEventListener = object : ChildEventListener {
+
         override fun onChildAdded(dataSnapshot: DataSnapshot, s: String?) {
             val map = dataSnapshot.value as Map<*, *>
 
@@ -59,16 +63,36 @@ class QuestionDetailActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_question_detail)
 
+        val dataBaseReference = FirebaseDatabase.getInstance().reference
+
         // 渡ってきたQuestionのオブジェクトを保持する
         val extras = intent.extras
         mQuestion = extras!!.get("question") as Question
 
         // ログイン済みのユーザーを取得する
-        val user = FirebaseAuth.getInstance().currentUser
+        val user = FirebaseAuth.getInstance().currentUser!!.uid
 
+        //★お気に入り登録処理を書く
         if( user == null) {
-            favoriteImageView.setImageDrawable(resources.getDrawable(R.drawable.ic_favorite_border,null))
+            favoriteImageView.visibility = View.INVISIBLE
         }
+        //★お気に入りボタンに対してリスナーをセットしたい
+        favoriteImageView.apply{
+            setOnClickListener{
+                //★押されたら一覧に登録する処理を書く
+
+                val favoriteRef = dataBaseReference.child(FavoritePATH).child(user)
+                val data = HashMap<String, String>()
+                data["title"] = mQuestion.questionUid
+                data["body"] = mQuestion.title
+                favoriteRef.push().setValue(data, this)
+
+                Log.d("FavoriteTest", data.toString())
+
+            }
+
+        }
+
 
         title = mQuestion.title
 
@@ -90,7 +114,7 @@ class QuestionDetailActivity : AppCompatActivity() {
             }
         }
 
-        val dataBaseReference = FirebaseDatabase.getInstance().reference
+
         mAnswerRef = dataBaseReference.child(ContentsPATH).child(mQuestion.genre.toString()).child(mQuestion.questionUid).child(AnswersPATH)
         mAnswerRef.addChildEventListener(mEventListener)
     }

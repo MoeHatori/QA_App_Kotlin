@@ -41,11 +41,12 @@ class QuestionSendActivity : AppCompatActivity(), View.OnClickListener, Database
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_question_send)
 
+
         // 渡ってきたジャンルの番号を保持する(ここでは保持するだけ)
         val extras = intent.extras
         mGenre = extras!!.getInt("genre")
 
-        // UIの準備
+        // UIの準備（タイトルに”質問作成”を表示する）
         title = getString(R.string.question_send_title)
 
         sendButton.setOnClickListener(this)
@@ -121,7 +122,7 @@ class QuestionSendActivity : AppCompatActivity(), View.OnClickListener, Database
 
             val dataBaseReference = FirebaseDatabase.getInstance().reference
             val genreRef = dataBaseReference.child(ContentsPATH).child(mGenre.toString())
-            //データベースへの書き込み準備
+            //データベースへの書き込み準備（Contents→ジャンルの下に書き込むように）
 
             val data = HashMap<String, String>()
 
@@ -167,6 +168,7 @@ class QuestionSendActivity : AppCompatActivity(), View.OnClickListener, Database
                 data["image"] = bitmapString
             }
 
+            //Firebaseへの書き込み
             genreRef.push().setValue(data, this)
             progressBar.visibility = View.VISIBLE
         }

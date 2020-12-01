@@ -10,13 +10,19 @@ import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.ImageView
 import android.widget.TextView
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.android.synthetic.main.list_question_detail.view.*
+
 
 class QuestionDetailListAdapter(context: Context, private val mQustion: Question) : BaseAdapter() {
     companion object {
         private val TYPE_QUESTION = 0
         private val TYPE_ANSWER = 1
     }
+
+    //ログインしているか判定
+    //val user: Int  = if (FirebaseAuth.getInstance().currentUser == null ) 0 else 1
+    //Log.d("Test",user)
 
     private var mLayoutInflater: LayoutInflater? = null
 

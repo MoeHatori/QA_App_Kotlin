@@ -25,13 +25,18 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private var mGenre = 0
 
     private lateinit var mDatabaseReference: DatabaseReference
+     //Firebaseに書き込むために必要なクラス
     private lateinit var mQuestionArrayList: ArrayList<Question>
     private lateinit var mAdapter: QuestionsListAdapter
+     //質問画面一覧のために必要なQuestionクラスのリストとアダプタ
 
     private var mGenreRef: DatabaseReference? = null
 
+    //questionListAdapterへのデータの設定
     private val mEventListener = object : ChildEventListener {
+
         override fun onChildAdded(dataSnapshot: DataSnapshot, s: String?) {
+
             val map = dataSnapshot.value as Map<String, String>
             val title = map["title"] ?: ""
             val body = map["body"] ?: ""
