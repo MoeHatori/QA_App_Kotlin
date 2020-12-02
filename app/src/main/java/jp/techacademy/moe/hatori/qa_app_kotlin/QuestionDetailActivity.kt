@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.core.view.isVisible
+import com.google.firebase.database.ValueEventListener
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import kotlinx.android.synthetic.main.activity_question_detail.*
@@ -63,35 +64,79 @@ class QuestionDetailActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_question_detail)
 
-        val dataBaseReference = FirebaseDatabase.getInstance().reference
 
         // 渡ってきたQuestionのオブジェクトを保持する
         val extras = intent.extras
         mQuestion = extras!!.get("question") as Question
 
         // ログイン済みのユーザーを取得する
-        val user = FirebaseAuth.getInstance().currentUser!!.uid
+        val user = FirebaseAuth.getInstance().currentUser
+        val dataBaseReference = FirebaseDatabase.getInstance().reference
+
+        val favoriteList = ArrayList<Favorites>()
+
 
         //★お気に入り登録処理を書く
         if( user == null) {
             favoriteImageView.visibility = View.INVISIBLE
-        }
-        //★お気に入りボタンに対してリスナーをセットしたい
-        favoriteImageView.apply{
-            setOnClickListener{
-                //★押されたら一覧に登録する処理を書く
+        } else {
 
-                val favoriteRef = dataBaseReference.child(FavoritePATH).child(user)
-                val data = HashMap<String, String>()
-                data["title"] = mQuestion.questionUid
-                data["body"] = mQuestion.title
-                favoriteRef.push().setValue(data, this)
+            val favoriteRef = dataBaseReference.child(FavoritePATH).child(user.uid)
 
-                Log.d("FavoriteTest", data.toString())
+            //★Firebaseのfavoriteを読み込む
+            favoriteRef.addValueEventListener(object : ValueEventListener{
+                override fun onDataChange(snapshot: DataSnapshot) {
 
+                    //★読み込んできたログインUserのfavoriteをリストで保持する
+
+                    val favoriteResult = snapshot.value as Map<String, String>?
+
+                    if (favoriteResult != null){
+                        for (key in favoriteResult.keys){
+                            val temp = favoriteResult[key] as Map<String, String>
+                            val favoriteTitle = temp["title"] ?: ""
+                            val favorite = Favorites(key,favoriteTitle)
+                            Log.d("Test_FavList",favorite.uid + favorite.title)
+                            favoriteList.add(favorite)
+                        }
+                    }
+
+                }
+                override fun onCancelled(error: DatabaseError) {
+                    TODO("Not yet implemented")
+                }
+
+            })
+
+            Log.d("Test_FavListの内容",favoriteList.toString())
+
+            //★もし、お気に入りが登録されてたら♥を表示する
+            //★お気に入りに登録されてなかったらお気に入りボタンが押されたときにリストに登録する
+
+//            if (favoriteList != null){
+//                for ( i in favoriteList.indices){
+//                    if (favoriteList[i].uid == mQuestion.questionUid){
+//                        favoriteImageView.setImageDrawable(resources.getDrawable(R.drawable.ic_favorite,null))
+//                        Log.d("Test_sameFavorite","favされてます")
+//                    }
+//                }
+//            }
+
+
+
+            favoriteImageView.apply{
+                setOnClickListener{
+                    //★押されたら一覧に登録する処理を書く
+                    //★もしも登録されてなかったらFirebaseを更新する処理をかく
+
+                    val data = HashMap<String, String>()
+                    data["title"] = mQuestion.title
+                    favoriteRef.child(mQuestion.questionUid).setValue(data)
+                    Log.d("Test_sameFavorite","favされました")
+                }
             }
-
         }
+
 
 
         title = mQuestion.title
@@ -118,5 +163,7 @@ class QuestionDetailActivity : AppCompatActivity() {
         mAnswerRef = dataBaseReference.child(ContentsPATH).child(mQuestion.genre.toString()).child(mQuestion.questionUid).child(AnswersPATH)
         mAnswerRef.addChildEventListener(mEventListener)
     }
+
+
 
 }

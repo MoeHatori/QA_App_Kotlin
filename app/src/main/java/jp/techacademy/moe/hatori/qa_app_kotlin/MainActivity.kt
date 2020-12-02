@@ -3,6 +3,7 @@ package jp.techacademy.moe.hatori.qa_app_kotlin
 import android.content.Intent
 import android.os.Bundle
 import android.util.Base64
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
@@ -38,6 +39,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         override fun onChildAdded(dataSnapshot: DataSnapshot, s: String?) {
 
             val map = dataSnapshot.value as Map<String, String>
+            //Log.d("Test1",map.toString())
             val title = map["title"] ?: ""
             val body = map["body"] ?: ""
             val name = map["name"] ?: ""
@@ -65,6 +67,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
             val question = Question(title, body, name, uid, dataSnapshot.key ?: "",
                 mGenre, bytes, answerArrayList)
+            //Log.d("Test2",question.toString())
             mQuestionArrayList.add(question)
             mAdapter.notifyDataSetChanged()
         }
