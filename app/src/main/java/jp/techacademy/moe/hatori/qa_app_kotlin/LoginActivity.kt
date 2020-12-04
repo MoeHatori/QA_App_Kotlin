@@ -14,15 +14,10 @@ import com.google.firebase.database.*
 import kotlinx.android.synthetic.main.activity_login.*
 
 class LoginActivity : AppCompatActivity() {
-
-    //プロパティの宣言
     private lateinit var mAuth: FirebaseAuth
     private lateinit var mCreateAccountListener: OnCompleteListener<AuthResult>
-    //処理の完了を受け取るリスナー:アカウント作成用
     private lateinit var mLoginListener: OnCompleteListener<AuthResult>
-    //処理の完了を受け取るリスナー:ログイン用
     private lateinit var mDataBaseReference: DatabaseReference
-    //DBへの読み書き用クラス
 
     // アカウント作成時にフラグを立て、ログイン処理後に名前をFirebaseに保存する
     private var mIsCreateAccount = false
@@ -62,7 +57,6 @@ class LoginActivity : AppCompatActivity() {
                 // 成功した場合
                 val user = mAuth.currentUser
                 val userRef = mDataBaseReference.child(UsersPATH).child(user!!.uid)
-                //Firebaseへの書き込み準備
 
                 if (mIsCreateAccount) {
                     // アカウント作成の時は表示名をFirebaseに保存する
@@ -71,7 +65,6 @@ class LoginActivity : AppCompatActivity() {
                     val data = HashMap<String, String>()
                     data["name"] = name
                     userRef.setValue(data)
-                    //Firebaseへの書き込み
 
                     // 表示名をPreferenceに保存する
                     saveName(name)
@@ -104,7 +97,6 @@ class LoginActivity : AppCompatActivity() {
         }
 
         // タイトルの設定
-        //アカウント作成ボタンをタップしたときの処理
         title = getString(R.string.login_title)
 
         createButton.setOnClickListener { v ->
@@ -127,7 +119,6 @@ class LoginActivity : AppCompatActivity() {
             }
         }
 
-        //ログインボタンをタップしたときの処理
         loginButton.setOnClickListener { v ->
             // キーボードが出てたら閉じる
             val im = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
@@ -152,7 +143,7 @@ class LoginActivity : AppCompatActivity() {
         // プログレスバーを表示する
         progressBar.visibility = View.VISIBLE
 
-        // アカウントを作成する（Firebaseへの書き込み）
+        // アカウントを作成する
         mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(mCreateAccountListener)
     }
 
@@ -160,12 +151,12 @@ class LoginActivity : AppCompatActivity() {
         // プログレスバーを表示する
         progressBar.visibility = View.VISIBLE
 
-        // ログインする（Firebaseへの書き込み）
+        // ログインする
         mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(mLoginListener)
     }
 
     private fun saveName(name: String) {
-        // Preferenceに保存する（表示名をローカルに保存しておく処理）
+        // Preferenceに保存する
         val sp = PreferenceManager.getDefaultSharedPreferences(this)
         val editor = sp.edit()
         editor.putString(NameKEY, name)

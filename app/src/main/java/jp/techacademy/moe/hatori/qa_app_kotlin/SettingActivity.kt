@@ -2,6 +2,7 @@ package jp.techacademy.moe.hatori.qa_app_kotlin
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.inputmethod.InputMethodManager
 import androidx.preference.PreferenceManager
 import com.google.android.material.snackbar.Snackbar
@@ -35,10 +36,12 @@ class SettingActivity : AppCompatActivity() {
 
             // ログイン済みのユーザーを取得する
             val user = FirebaseAuth.getInstance().currentUser
+            Log.d("Test","セッティング画面に入りました")
 
             if (user == null) {
                 // ログインしていない場合は何もしない
                 Snackbar.make(v, getString(R.string.no_login_user), Snackbar.LENGTH_LONG).show()
+                nameText.setText("")
             } else {
                 // 変更した表示名をFirebaseに保存する
                 val name2 = nameText.text.toString()
@@ -60,6 +63,11 @@ class SettingActivity : AppCompatActivity() {
         logoutButton.setOnClickListener { v ->
             FirebaseAuth.getInstance().signOut()
             nameText.setText("")
+            //★テキスト未実装
+            val sp2 = PreferenceManager.getDefaultSharedPreferences(applicationContext)
+            val editor = sp2.edit()
+            editor.putString(NameKEY, "")
+            editor.commit()
             Snackbar.make(v, getString(R.string.logout_complete_message), Snackbar.LENGTH_LONG).show()
         }
     }

@@ -1,8 +1,10 @@
 package jp.techacademy.moe.hatori.qa_app_kotlin
 
 import android.content.Intent
+import android.graphics.Bitmap
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Base64
 import android.util.Log
 import android.view.View
 import androidx.core.view.isVisible
@@ -11,6 +13,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import kotlinx.android.synthetic.main.activity_question_detail.*
 import kotlinx.android.synthetic.main.list_question_detail.*
+import java.io.ByteArrayOutputStream
 
 class QuestionDetailActivity : AppCompatActivity() {
 
@@ -18,6 +21,7 @@ class QuestionDetailActivity : AppCompatActivity() {
     private lateinit var mAdapter: QuestionDetailListAdapter
     private lateinit var mAnswerRef: DatabaseReference
 
+    private var favoriteList = ArrayList<Favorites>()
 
     //回答が更新されたらリストを更新する
     private val mEventListener = object : ChildEventListener {
@@ -73,7 +77,7 @@ class QuestionDetailActivity : AppCompatActivity() {
         val user = FirebaseAuth.getInstance().currentUser
         val dataBaseReference = FirebaseDatabase.getInstance().reference
 
-        val favoriteList = ArrayList<Favorites>()
+
 
 
         //★お気に入り登録処理を書く
@@ -88,16 +92,26 @@ class QuestionDetailActivity : AppCompatActivity() {
                 override fun onDataChange(snapshot: DataSnapshot) {
 
                     //★読み込んできたログインUserのfavoriteをリストで保持する
-
                     val favoriteResult = snapshot.value as Map<String, String>?
 
                     if (favoriteResult != null){
                         for (key in favoriteResult.keys){
                             val temp = favoriteResult[key] as Map<String, String>
-                            val favoriteTitle = temp["title"] ?: ""
-                            val favorite = Favorites(key,favoriteTitle)
-                            Log.d("Test_FavList",favorite.uid + favorite.title)
+                            val favoriteGenre = temp["genre"] ?: ""
+                            val favorite = Favorites(key,favoriteGenre)
+                            Log.d("Test_FavList",favorite.uid + favorite.genre)
                             favoriteList.add(favorite)
+
+                        }
+                    }
+                    Log.d("Test_FavListの内容①",favoriteList.toString())
+
+                    if (favoriteList != null){
+                        for ( i in favoriteList.indices){
+                            if (favoriteList[i].uid == mQuestion.questionUid){
+                                favoriteImageView.setImageResource(R.drawable.ic_favorite)
+                                Log.d("Test_sameFavorite","favされてます")
+                            }
                         }
                     }
 
@@ -108,19 +122,12 @@ class QuestionDetailActivity : AppCompatActivity() {
 
             })
 
-            Log.d("Test_FavListの内容",favoriteList.toString())
+            Log.d("Test_FavListの内容②",favoriteList.toString())
 
             //★もし、お気に入りが登録されてたら♥を表示する
             //★お気に入りに登録されてなかったらお気に入りボタンが押されたときにリストに登録する
 
-//            if (favoriteList != null){
-//                for ( i in favoriteList.indices){
-//                    if (favoriteList[i].uid == mQuestion.questionUid){
-//                        favoriteImageView.setImageDrawable(resources.getDrawable(R.drawable.ic_favorite,null))
-//                        Log.d("Test_sameFavorite","favされてます")
-//                    }
-//                }
-//            }
+
 
 
 
@@ -129,13 +136,22 @@ class QuestionDetailActivity : AppCompatActivity() {
                     //★押されたら一覧に登録する処理を書く
                     //★もしも登録されてなかったらFirebaseを更新する処理をかく
 
-                    val data = HashMap<String, String>()
-                    data["title"] = mQuestion.title
+                    val data = HashMap<String,String>()
+                    data["genre"] = mQuestion.genre.toString() ?: ""
+                    data["title"] = mQuestion.title ?: ""
+                    data["body"] = mQuestion.body ?: ""
+                    data["name"] = mQuestion.name ?: ""
+                    data["uid"] = mQuestion.uid ?: ""
+                    val imageBytes = mQuestion.imageBytes
+                    val bitmapString = Base64.encodeToString(imageBytes, Base64.DEFAULT)
+                    data["image"] = bitmapString
                     favoriteRef.child(mQuestion.questionUid).setValue(data)
                     Log.d("Test_sameFavorite","favされました")
                 }
             }
         }
+
+
 
 
 
