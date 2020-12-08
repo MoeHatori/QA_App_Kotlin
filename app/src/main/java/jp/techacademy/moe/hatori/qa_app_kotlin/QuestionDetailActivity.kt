@@ -99,18 +99,18 @@ class QuestionDetailActivity : AppCompatActivity() {
                             val temp = favoriteResult[key] as Map<String, String>
                             val favoriteGenre = temp["genre"] ?: ""
                             val favorite = Favorites(key,favoriteGenre)
-                            Log.d("Test_FavList",favorite.uid + favorite.genre)
+                            //Log.d("Test_FavList",favorite.uid + favorite.genre)
                             favoriteList.add(favorite)
 
                         }
                     }
-                    Log.d("Test_FavListの内容①",favoriteList.toString())
+                    //Log.d("Test_FavListの内容①",favoriteList.toString())
 
                     if (favoriteList != null){
                         for ( i in favoriteList.indices){
                             if (favoriteList[i].uid == mQuestion.questionUid){
                                 favoriteImageView.setImageResource(R.drawable.ic_favorite)
-                                Log.d("Test_sameFavorite","favされてます")
+                                //Log.d("Test_sameFavorite","favされてます")
                             }
                         }
                     }
@@ -122,14 +122,10 @@ class QuestionDetailActivity : AppCompatActivity() {
 
             })
 
-            Log.d("Test_FavListの内容②",favoriteList.toString())
+            //Log.d("Test_FavListの内容②",favoriteList.toString())
 
             //★もし、お気に入りが登録されてたら♥を表示する
             //★お気に入りに登録されてなかったらお気に入りボタンが押されたときにリストに登録する
-
-
-
-
 
             favoriteImageView.apply{
                 setOnClickListener{
@@ -146,7 +142,7 @@ class QuestionDetailActivity : AppCompatActivity() {
                     val bitmapString = Base64.encodeToString(imageBytes, Base64.DEFAULT)
                     data["image"] = bitmapString
                     favoriteRef.child(mQuestion.questionUid).setValue(data)
-                    Log.d("Test_sameFavorite","favされました")
+                    //Log.d("Test_sameFavorite","favされました")
                 }
             }
         }
